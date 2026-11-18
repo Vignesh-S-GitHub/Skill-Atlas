@@ -66,7 +66,7 @@ export function GitHubSkillsDialog({ initialQuery, onClose, onBack }: {
       </div>
       <div className="git-status">
         <p role="status"><strong>{results.length} {results.length === 1 ? 'skill' : 'skills'}</strong><span>{status}</span></p>
-        <button type="button" className="icon-button bordered-icon" aria-label="Refresh GitHub skills" title="Refresh GitHub skills" disabled={loading}
+        <button type="button" className="icon-button bordered-icon" aria-label="Refresh GitHub skills" title="Refresh GitHub skills" disabled={loading} aria-busy={loading}
           onClick={() => { setLoading(true); setRefresh(value => value + 1) }}><RefreshCw size={16} aria-hidden="true" /></button>
       </div>
       {results.length ? <>

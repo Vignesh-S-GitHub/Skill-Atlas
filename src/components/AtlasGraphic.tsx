@@ -1,8 +1,28 @@
+import { useEffect, useRef } from 'react'
 import { Braces, CodeXml, Terminal, Orbit } from 'lucide-react'
 
 export function AtlasGraphic({ active }: { active: boolean }) {
+  const atlasRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const atlas = atlasRef.current
+    if (!atlas || !('IntersectionObserver' in window)) return
+    let visible = false
+    const sync = () => { atlas.dataset.inView = String(visible && !document.hidden) }
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting
+      sync()
+    })
+    observer.observe(atlas)
+    document.addEventListener('visibilitychange', sync)
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', sync)
+    }
+  }, [])
+
   return (
-    <div className="atlas-art" data-active={active} aria-hidden="true">
+    <div className="atlas-art" ref={atlasRef} data-active={active} aria-hidden="true">
       <svg viewBox="0 0 490 280" className="atlas-map" fill="none">
         <defs>
           <pattern id="atlas-grid" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -26,6 +46,11 @@ export function AtlasGraphic({ active }: { active: boolean }) {
           <ellipse cx="245" cy="140" rx="178" ry="54" transform="rotate(23 245 140)" stroke="currentColor" strokeOpacity=".3" />
           <path d="M126 165h54l29-23m67-33 33-26h48m-80 91 37 29h48m-121-106-38-47h-35" stroke="currentColor" strokeOpacity=".8" />
           <g className="map-accent">
+            <g className="atlas-beacon" fill="currentColor">
+              <circle cx="343" cy="116" r="1.3" opacity=".30" />
+              <circle cx="345.3" cy="128" r="2.2" opacity=".55" />
+              <circle cx="346" cy="140" r="3.5" />
+            </g>
             <path className="atlas-signal" d="M144 140a101 101 0 1 1 202 0 101 101 0 1 1-202 0" pathLength="100" stroke="currentColor" strokeWidth="1.8" />
             <path d="M144 140a101 101 0 0 1 101-101m101 101a101 101 0 0 1-101 101" opacity=".61" strokeDasharray="19 5 3 13" stroke="currentColor" />
             <circle cx="144" cy="140" r="3.5" fill="currentColor" />

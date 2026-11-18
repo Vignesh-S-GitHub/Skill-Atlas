@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import {
   ArrowDownToLine, ArrowRight, Braces, CodeXml, Compass, Database, FlaskConical, GitCompareArrows, GitFork,
@@ -54,6 +54,7 @@ function App() {
   const [theme, setTheme] = useState(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark')
   const [toast, setToast] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const tablistRef = useRef<HTMLDivElement>(null)
   const toastTimer = useRef<number | undefined>(undefined)
 
   useEffect(() => {
@@ -85,6 +86,21 @@ function App() {
   }, [overlay])
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
+
+  useLayoutEffect(() => {
+    const list = tablistRef.current
+    const selected = list?.querySelector<HTMLButtonElement>('[aria-selected="true"]')
+    if (!list || !selected || !('ResizeObserver' in window)) return
+    const align = () => {
+      list.style.setProperty('--tab-x', `${selected.offsetLeft}px`)
+      list.style.setProperty('--tab-width', String(selected.offsetWidth / 100))
+      list.dataset.indicator = 'ready'
+    }
+    align()
+    const observer = new ResizeObserver(align)
+    for (const button of list.children) observer.observe(button)
+    return () => observer.disconnect()
+  }, [tab])
 
   const catalog = sites ?? noSites
   const index = useMemo(() => createSearch(catalog), [catalog])
@@ -243,7 +259,7 @@ function App() {
 
       <section className="directory" id="directory" aria-label="Skills directory" tabIndex={-1}>
         <div className="directory-bar">
-          <div role="tablist" aria-label="Directory views" className="tabs">
+          <div ref={tablistRef} role="tablist" aria-label="Directory views" className="tabs">
             {tabs.map(({ id, label, Icon }, i) => <button type="button" role="tab" id={`tab-${id}`} key={id} aria-selected={tab === id}
               aria-controls={`panel-${id}`} tabIndex={tab === id ? 0 : -1} onClick={() => setTab(id)} onKeyDown={event => changeTab(event, i)}>
               <Icon size={17} aria-hidden="true" /><span>{label}</span>
@@ -304,8 +320,10 @@ function App() {
     {overlay?.kind === 'github' && <GitHubSkillsDialog initialQuery={overlay.initialQuery} onClose={closeOverlay}
       onBack={overlay.fromEverywhere ? () => setOverlay({ kind: 'everywhere', initialQuery: overlay.initialQuery }) : undefined} />}
     {overlay?.kind === 'filters' && <Dialog title={<h2>Directory filters</h2>} onClose={closeOverlay} kind="filter-sheet">
-      <div className="dialog-content"><FilterPanel {...filterPanel} /></div>
-      <div className="dialog-footer"><button type="button" className="primary-button" onClick={closeOverlay}>Show {sourceCount} <ArrowRight size={17} /></button></div>
+      {dismiss => <>
+        <div className="dialog-content"><FilterPanel {...filterPanel} /></div>
+        <div className="dialog-footer"><button type="button" className="primary-button" onClick={dismiss}>Show {sourceCount} <ArrowRight size={17} /></button></div>
+      </>}
     </Dialog>}
   </ToastContext.Provider>
 }

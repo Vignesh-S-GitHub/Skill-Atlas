@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowUpRight, Check, CircleHelp, Flag, GitCompareArrows, Globe2, Heart, Link2, Plus,
 } from 'lucide-react'
@@ -45,11 +45,25 @@ interface CardProps {
 
 export function SiteCard({ result, favorite, compared, onFavorite, onCompare, onDetails, onCopy, onReport }: CardProps) {
   const { site, highlights } = result
+  const cardRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const card = cardRef.current
+    if (!card || !('IntersectionObserver' in window)) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      card.dataset.visible = 'true'
+      observer.disconnect()
+    }, { threshold: 0.15 })
+    observer.observe(card)
+    return () => observer.disconnect()
+  }, [])
+
   const chipFields = ['focus', 'platforms', 'installMethod', 'features']
   const metadata = chipFields.flatMap(field => Object.keys(highlights[field] ?? {}).map(value => ({ value, field })))
   const descriptionMatch = Object.entries(highlights.description ?? {})[0]
   const excerptStart = Math.max(0, (descriptionMatch?.[1][0]?.start ?? 0) - 22)
-  return <article className="site-card">
+  return <article ref={cardRef} className="site-card">
     <div className="card-top">
       <Favicon site={site} />
       <div className="card-tools">

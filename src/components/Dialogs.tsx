@@ -9,9 +9,10 @@ import { githubCodeSearchUrl } from '../githubSkills'
 export const ToastContext = createContext('')
 
 export function Dialog({ title, children, onClose, kind = '' }: {
-  title: ReactNode; children: ReactNode; onClose: () => void; kind?: string;
+  title: ReactNode; children: ReactNode | ((dismiss: () => void) => ReactNode); onClose: () => void; kind?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const closeTimer = useRef<number | undefined>(undefined)
   const titleId = useId()
   const toast = useContext(ToastContext)
   useEffect(() => {
@@ -21,19 +22,32 @@ export function Dialog({ title, children, onClose, kind = '' }: {
     dialog.showModal()
     dialog.querySelector<HTMLElement>('[data-initial-focus]')?.focus()
     return () => {
+      window.clearTimeout(closeTimer.current)
+      closeTimer.current = undefined
       dialog.close()
       if (focused instanceof HTMLElement && focused.isConnected) focused.focus()
     }
   }, [])
+  function dismiss() {
+    if (closeTimer.current !== undefined) return
+    const dialog = ref.current
+    if (!dialog || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onClose()
+      return
+    }
+    dialog.dataset.closing = 'true'
+    closeTimer.current = window.setTimeout(onClose, 160)
+  }
+
   return <dialog ref={ref} className={`dialog ${kind}`} aria-labelledby={titleId} onCancel={event => {
     event.preventDefault()
-    onClose()
-  }} onClick={event => { if (event.target === event.currentTarget) onClose() }}>
+    dismiss()
+  }} onClick={event => { if (event.target === event.currentTarget) dismiss() }}>
     <div className="dialog-inner">
       <header className="dialog-header"><div id={titleId} className="dialog-title">{title}</div>
-        <button autoFocus type="button" className="icon-button bordered-icon" aria-label="Close dialog" onClick={onClose}><X size={20} /></button>
+        <button autoFocus type="button" className="icon-button bordered-icon" aria-label="Close dialog" onClick={dismiss}><X size={20} /></button>
       </header>
-      {children}
+      {typeof children === 'function' ? children(dismiss) : children}
       <div className={`toast dialog-toast${toast ? ' toast-visible' : ''}`} role="status">{toast}</div>
     </div>
   </dialog>

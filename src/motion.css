@@ -1,0 +1,155 @@
+:root {
+  --motion-ease: cubic-bezier(.16, 1, .3, 1);
+  --motion-quick: 160ms;
+  --motion-base: 260ms;
+}
+
+.hero-copy h1 { animation: hero-arrive 560ms var(--motion-ease) both; }
+.hero-copy p { animation: hero-arrive 510ms 60ms var(--motion-ease) both; }
+
+@keyframes hero-arrive {
+  from { opacity: .65; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.atlas-beacon {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: atlas-orbit 26s linear infinite paused;
+}
+.atlas-art[data-in-view='true'] .atlas-beacon { animation-play-state: running; }
+
+@keyframes atlas-orbit { to { transform: rotate(1turn); } }
+
+@media (375px <= width < 740px) {
+  .hero { overflow: clip; }
+  .atlas-art {
+    display: block;
+    width: 252px;
+    max-width: none;
+    right: -70px;
+    bottom: 0;
+    opacity: .43;
+    mask-image: linear-gradient(90deg, transparent 18%, #000 66%);
+  }
+  .atlas-art .map-node { display: none; }
+}
+
+.tabs { position: relative; }
+.tabs > button {
+  transition: color var(--motion-quick) var(--ease);
+}
+.tabs[data-indicator='ready'] > button[aria-selected='true'] { border-bottom-color: transparent; }
+.tabs[data-indicator='ready']::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: 2px;
+  background: var(--accent-text);
+  transform-origin: left center;
+  transform: translateX(var(--tab-x, 0)) scaleX(var(--tab-width, 1));
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+
+:is(.icon-button, .secondary-button, .primary-button, .visit-button, .compare-button,
+  .helper-chip, .facet-option, .active-filters button, .everywhere-button) {
+  transition: background-color var(--motion-quick) var(--ease), border-color var(--motion-quick) var(--ease),
+    color var(--motion-quick) var(--ease), scale var(--motion-quick) var(--motion-ease);
+}
+:is(.icon-button, .secondary-button, .primary-button, .visit-button, .compare-button,
+  .helper-chip, .facet-option, .active-filters button, .everywhere-button):active:not(:disabled) { scale: .96; }
+
+.main-search, .modal-search {
+  transition: border-color var(--motion-quick) var(--ease), box-shadow var(--motion-base) var(--motion-ease);
+}
+.filter-group summary::after { transition: transform var(--motion-base) var(--motion-ease); }
+.filter-group[open] .filter-options { animation: content-arrive var(--motion-base) var(--motion-ease); }
+
+.facet-option[aria-pressed='true'] .facet-check svg,
+.favorite[aria-pressed='true'] svg,
+.compare-button[aria-pressed='true'] svg {
+  animation: select-confirm 290ms var(--motion-ease);
+}
+.tab-count, .active-filters button { animation: select-confirm var(--motion-base) var(--motion-ease); }
+@keyframes select-confirm {
+  0% { scale: .83; }
+  58% { scale: 1.08; }
+}
+
+.site-card {
+  transition: border-color var(--motion-quick) var(--ease), background-color var(--motion-quick) var(--ease),
+    transform var(--motion-base) var(--motion-ease), box-shadow var(--motion-base) var(--motion-ease);
+}
+.site-card[data-visible='true'] { animation: card-arrive 410ms var(--motion-ease); }
+.site-card[data-visible='true']:nth-child(3n+2) { animation-delay: 35ms; }
+.site-card[data-visible='true']:nth-child(3n) { animation-delay: 70ms; }
+
+@keyframes card-arrive {
+  from { opacity: .60; translate: 0 11px; }
+  to { opacity: 1; translate: 0; }
+}
+
+.compare-panel .table-scroll, .empty-state,
+.git-skill-list li:nth-child(-n+6), .destination-list > .destination:nth-child(-n+6) {
+  animation: content-arrive var(--motion-base) var(--motion-ease);
+}
+
+@keyframes content-arrive {
+  from { opacity: .60; translate: 0 4px; }
+  to { opacity: 1; translate: 0; }
+}
+
+.git-status button[aria-busy='true'] svg { animation: refresh-turn 1.2s linear infinite; }
+@keyframes refresh-turn { to { transform: rotate(1turn); } }
+
+.dialog {
+  --dialog-offset: 0 10px;
+  --dialog-enter: 260ms;
+}
+.detail-dialog { --dialog-offset: 28px 0; --dialog-enter: 330ms; }
+.filter-sheet { --dialog-offset: 0 28px; --dialog-enter: 330ms; }
+.dialog[open] { animation: overlay-arrive var(--dialog-enter) var(--motion-ease) both; }
+.dialog[open]::backdrop { animation: backdrop-arrive var(--dialog-enter) var(--motion-ease) both; }
+.dialog[open][data-closing='true'] { animation: overlay-exit 160ms ease-in both; }
+.dialog[open][data-closing='true']::backdrop { animation: backdrop-exit 160ms ease-in both; }
+
+@keyframes overlay-arrive {
+  from { opacity: 0; translate: var(--dialog-offset); }
+  to { opacity: 1; translate: 0; }
+}
+@keyframes overlay-exit { to { opacity: 0; translate: var(--dialog-offset); } }
+@keyframes backdrop-arrive { from { opacity: 0; } }
+@keyframes backdrop-exit { to { opacity: 0; } }
+
+@media (hover: hover) and (pointer: fine) {
+  .site-card:not(.skeleton):hover { transform: translateY(-3px); box-shadow: 0 11px 24px -15px var(--veil); }
+
+  :is(.visit-button, .everywhere-button, .destination) > svg:last-child {
+    transition: transform var(--motion-base) var(--motion-ease);
+  }
+  :is(.visit-button, .destination):hover > svg:last-child,
+  .everywhere-button:hover > .everywhere-arrow { transform: translate(2px, -2px); }
+
+  .theme-toggle svg, .dialog-header .icon-button svg {
+    transition: transform var(--motion-base) var(--motion-ease);
+  }
+  .theme-toggle:hover svg { transform: rotate(16deg); }
+  .dialog-header .icon-button:hover svg { transform: rotate(9deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  .site-card:not(.skeleton):hover,
+  :is(.visit-button, .destination):hover > svg:last-child,
+  .everywhere-button:hover > .everywhere-arrow,
+  .theme-toggle:hover svg, .dialog-header .icon-button:hover svg { transform: none; }
+  :is(.icon-button, .secondary-button, .primary-button, .visit-button, .compare-button,
+    .helper-chip, .facet-option, .active-filters button, .everywhere-button):active { scale: none; }
+}
