@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, ChevronRight, Clipboard, ExternalLink, GitFork, Se
 import { filterOptions, formatDate, githubRepository, hasIssueRepository, hostName, searchUrl, siteStats } from '../catalog'
 import type { Site } from '../catalog'
 import { Favicon } from './CatalogUI'
+import { githubCodeSearchUrl } from '../githubSkills'
 
 export const ToastContext = createContext('')
 
@@ -18,6 +19,7 @@ export function Dialog({ title, children, onClose, kind = '' }: {
     if (!dialog) return
     const focused = document.activeElement
     dialog.showModal()
+    dialog.querySelector<HTMLElement>('[data-initial-focus]')?.focus()
     return () => {
       dialog.close()
       if (focused instanceof HTMLElement && focused.isConnected) focused.focus()
@@ -69,25 +71,33 @@ export function DetailDialog({ site, onClose, copy }: { site: Site; onClose: () 
   </Dialog>
 }
 
-export function EverywhereDialog({ sites, initialQuery, onClose }: { sites: Site[]; initialQuery: string; onClose: () => void }) {
+export function EverywhereDialog({ sites, initialQuery, onClose, onBrowseGitHub }: {
+  sites: Site[]; initialQuery: string; onClose: () => void; onBrowseGitHub: (query: string) => void
+}) {
   const [query, setQuery] = useState(initialQuery)
   const term = query.trim()
-  const kindLabels = { native: 'Site search', site: 'Site-scoped web search', github: 'Repository code search' }
+  const kindLabels = { native: 'Site search', site: 'Site-scoped web search', github: 'Repository code search · GitHub sign-in' }
   return <Dialog title={<h2>Search everywhere</h2>} onClose={onClose} kind="everywhere-dialog">
     <div className="dialog-content">
       <p className="modal-description">Send one query to any source in the directory.</p>
       <label className="modal-search"><Search size={19} /><span className="sr-only">Skill keyword</span>
-        <input type="search" placeholder="Try “react testing”" value={query} onChange={event => setQuery(event.target.value)} maxLength={200} />
+        <input type="search" data-initial-focus placeholder="Try “react testing”" value={query} onChange={event => setQuery(event.target.value)} maxLength={200} />
       </label>
-      {term ? <div className="destination-list">
-        <a className="destination github-destination" target="_blank" rel="noreferrer" href={searchUrl('https://github.com/search?type=code&q=filename%3ASKILL.md%20{query}', term)}>
+      <div className="destination-list">
+        <button type="button" className="destination github-destination" onClick={() => onBrowseGitHub(term)}>
           <span className="destination-icon"><GitFork size={20} /></span>
-          <span><strong>GitHub code search</strong><small>Search files named SKILL.md</small></span><ExternalLink size={16} />
-        </a>
+          <span><strong>Browse GitHub skills</strong><small>Find SKILL.md files without signing in</small></span><ChevronRight size={17} />
+        </button>
+        {term ? <>
+          <a className="destination" target="_blank" rel="noreferrer" href={githubCodeSearchUrl(term)}>
+            <span className="destination-icon"><Search size={18} /></span>
+            <span><strong>GitHub code search</strong><small>Search file contents · GitHub sign-in</small></span><ExternalLink size={16} />
+          </a>
         {sites.map(site => <a className="destination" key={site.id} target="_blank" rel="noreferrer" href={searchUrl(site.searchUrlTemplate, term)}>
           <Favicon site={site} /><span><strong>{site.name}</strong><small>{kindLabels[site.searchKind]}</small></span><ArrowUpRight size={17} />
         </a>)}
-      </div> : <p className="everywhere-empty">Enter a keyword to see search links for all {sites.length} sources and GitHub.</p>}
+        </> : <p className="everywhere-empty">Enter a keyword to see search links for all {sites.length} directory sources.</p>}
+      </div>
     </div>
   </Dialog>
 }

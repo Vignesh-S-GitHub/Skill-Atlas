@@ -92,6 +92,10 @@ mark { color: var(--accent-text); background: var(--accent-wash); border-radius:
 .atlas-art { display: none; position: absolute; right: 6px; width: 490px; max-width: 48%; aspect-ratio: 490 / 280; color: var(--map); pointer-events: none; }
 .atlas-map { position: absolute; width: 100%; height: 100%; }
 .map-accent { color: var(--accent-text); }
+.atlas-signal { stroke-dasharray: 15 85; stroke-dashoffset: 25; opacity: 0; transition: stroke-dashoffset .6s var(--ease), opacity .25s var(--ease); }
+.atlas-art[data-active='true'] .atlas-signal { stroke-dashoffset: -37; opacity: .95; }
+.atlas-art .node-main { transition: border-color .25s var(--ease), background-color .25s var(--ease); }
+.atlas-art[data-active='true'] .node-main { border-color: var(--accent-text); background: var(--soft); }
 .map-node { position: absolute; display: grid; place-items: center; translate: -50% -50%; width: 40px; height: 40px; border-radius: 11px; background: var(--surface); color: var(--accent-text); border: 1px solid var(--accent-border); box-shadow: 0 7px 16px -8px #0a0c0477; }
 .map-node svg { width: 19px; height: 19px; stroke-width: 1.6; }
 .node-main { top: 50%; left: 50%; width: 68px; height: 68px; border-radius: 18px; background: var(--accent-wash); }
@@ -271,6 +275,31 @@ body:has(dialog[open]) { overflow: hidden; }
 .destination-icon { display: grid; place-items: center; background: var(--soft); color: var(--accent-text); }
 .github-destination { border: 1px solid var(--accent-border); background: var(--accent-wash); }
 .github-destination:hover { border-color: var(--accent-text); }
+button.destination { text-align: left; width: 100%; }
+.github-launch { background: var(--accent-wash); color: var(--accent-text); border-color: var(--accent-border); }
+.github-launch svg { flex-shrink: 0; }
+.git-skill-dialog { width: min(620px, calc(100% - 24px)); }
+.git-skill-dialog .dialog-content { padding-bottom: 12px; }
+.git-back { min-height: 44px; margin: -8px 0 5px; }
+.git-search > svg { flex: 0 0 auto; }
+.git-search input { min-width: 0; }
+.git-search .icon-button { margin-right: -7px; }
+.git-repos { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.git-repos .helper-chip { min-height: 44px; }
+.git-status { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0; }
+.git-status p { display: flex; flex-wrap: wrap; gap: 3px 9px; align-items: baseline; font-variant-numeric: tabular-nums; }
+.git-status strong { font-size: 13px; color: var(--text); }
+.git-status p span { color: var(--muted); font-size: 12px; }
+.git-skill-list { margin: 0; border-top: 1px solid var(--line); }
+.git-skill-list li + li { border-top: 1px solid var(--line); }
+.git-skill-list .destination { min-height: 53px; padding-inline: 5px; }
+.git-skill-list .destination :is(strong,small) { overflow-wrap: anywhere; }
+.git-more { margin: 12px 0 0; }
+.git-empty { border-top: 1px solid var(--line); padding: 18px 0 10px; color: var(--text); font-size: 14px; }
+.git-empty p { color: var(--subtext); font-size: 13px; margin-top: 5px; }
+.git-search-links { flex-wrap: wrap; justify-content: flex-start; }
+.git-search-links .secondary-button { flex: 1 0 auto; }
+.git-search-links p { flex-basis: 100%; color: var(--muted); font-size: 11px; }
 .everywhere-empty { padding: 10px 2px; color: var(--muted); font-size: 13px; }
 
 .dialog-inner form { display: flex; flex-direction: column; min-height: 0; }
@@ -310,6 +339,7 @@ body:has(dialog[open]) { overflow: hidden; }
   .everywhere-button > svg:first-child { width: 19px; }
   .helper-row { flex-direction: row; align-items: center; gap: 10px; }
   .helper-chip { min-height: 34px; }
+  .git-repos .helper-chip { min-height: 36px; }
   .tabs { gap: 12px; }
   .tabs > button { gap: 7px; padding-inline: 10px; font-size: 13px; }
   .tabs > button svg { display: inline; }

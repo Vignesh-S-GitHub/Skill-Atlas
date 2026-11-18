@@ -28,7 +28,8 @@ The production build is in `dist/`. Serve that directory over HTTP to run the ap
 - Combine filters across groups. Multiple selections in the same group match any selection in that group. The topic shortcuts set the Focus filter.
 - Save favorites with the heart. Export a Markdown list from the Favorites tab. Favorites and appearance are stored in the current browser.
 - Select **Compare** on up to three cards, then open the Compare tab. The comparison table scrolls horizontally on narrow screens.
-- Use **Search everywhere** for direct searches where supported, site-scoped web searches, and GitHub code search. GitHub may require sign-in to display code search results.
+- Use **Search everywhere** for direct and site-scoped searches. GitHub code search uses an exact `SKILL.md` filename filter and requires a GitHub sign-in.
+- Open **GitHub skills** to search skill names, filter by repository, or open the corresponding file. The browser refreshes five public repositories through GitHub’s tree API and has a bundled snapshot in `data/github-skills.json` for unavailable or rate-limited requests. This view works without GitHub sign-in.
 
 ## Add or update a source
 

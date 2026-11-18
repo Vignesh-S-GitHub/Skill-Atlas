@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
 import {
-  ArrowDownToLine, ArrowRight, Braces, CodeXml, Compass, Database, FlaskConical, GitCompareArrows,
+  ArrowDownToLine, ArrowRight, Braces, CodeXml, Compass, Database, FlaskConical, GitCompareArrows, GitFork,
   Globe2, Heart, Moon, Plus, Search, SlidersHorizontal, Sun, Waypoints, X,
 } from 'lucide-react'
 import { AtlasGraphic } from './components/AtlasGraphic'
+import { GitHubSkillsDialog } from './components/GitHubSkillsDialog'
 import { CompareTable, EmptyState, FilterPanel, SiteCard, Skeletons } from './components/CatalogUI'
 import { DetailDialog, Dialog, EverywhereDialog, IssueDialog, ToastContext } from './components/Dialogs'
 import { createSearch, emptyFilters, filterKeys, matchesFilters, searchSites } from './catalog'
@@ -24,7 +25,12 @@ const tabs = [
   { id: 'compare', label: 'Compare', Icon: GitCompareArrows },
 ] as const
 type Tab = typeof tabs[number]['id']
-type Overlay = { kind: 'detail'; site: Site } | { kind: 'issue'; site?: Site } | { kind: 'everywhere' | 'filters' }
+type Overlay =
+  | { kind: 'detail'; site: Site }
+  | { kind: 'issue'; site?: Site }
+  | { kind: 'everywhere'; initialQuery?: string }
+  | { kind: 'github'; initialQuery: string; fromEverywhere?: boolean }
+  | { kind: 'filters' }
 const noSites: Site[] = []
 
 function initialFavorites(): string[] {
@@ -207,7 +213,7 @@ function App() {
         <div className="hero-copy"><h1 id="hero-title">Find your next<br /><em>agent skill.</em></h1>
           <p>Every place to find agent skills, in one search.</p>
         </div>
-        <AtlasGraphic />
+        <AtlasGraphic active={Boolean(query.trim() || selectionCount)} />
       </section>
 
       <div className="sticky-search">
@@ -262,6 +268,8 @@ function App() {
               <div><h2>{tab === 'favorites' ? 'Saved sources' : 'Browse sources'}</h2>
                 <p aria-live="polite">{loadError ? 'Directory unavailable' : sites ? `${sourceCount}${query.trim() ? ' found' : ''}` : 'Loading sources…'}</p>
               </div>
+              {tab === 'all' && <button type="button" className="secondary-button github-launch" aria-label="Browse GitHub skills"
+                onClick={() => setOverlay({ kind: 'github', initialQuery: query })}><GitFork size={17} aria-hidden="true" /> GitHub skills</button>}
               {tab === 'favorites' && favoriteSites.length > 0 && <button type="button" className="secondary-button export-button" onClick={exportFavorites}><ArrowDownToLine size={17} /> Export Markdown</button>}
             </div>
 
@@ -291,7 +299,10 @@ function App() {
     {!overlay && <div className={`toast${toast ? ' toast-visible' : ''}`} role="status">{toast}</div>}
     {overlay?.kind === 'detail' && <DetailDialog site={overlay.site} onClose={closeOverlay} copy={copy} />}
     {overlay?.kind === 'issue' && <IssueDialog site={overlay.site} onClose={closeOverlay} copy={copy} />}
-    {overlay?.kind === 'everywhere' && <EverywhereDialog sites={catalog} initialQuery={query} onClose={closeOverlay} />}
+    {overlay?.kind === 'everywhere' && <EverywhereDialog sites={catalog} initialQuery={overlay.initialQuery ?? query}
+      onClose={closeOverlay} onBrowseGitHub={initialQuery => setOverlay({ kind: 'github', initialQuery, fromEverywhere: true })} />}
+    {overlay?.kind === 'github' && <GitHubSkillsDialog initialQuery={overlay.initialQuery} onClose={closeOverlay}
+      onBack={overlay.fromEverywhere ? () => setOverlay({ kind: 'everywhere', initialQuery: overlay.initialQuery }) : undefined} />}
     {overlay?.kind === 'filters' && <Dialog title={<h2>Directory filters</h2>} onClose={closeOverlay} kind="filter-sheet">
       <div className="dialog-content"><FilterPanel {...filterPanel} /></div>
       <div className="dialog-footer"><button type="button" className="primary-button" onClick={closeOverlay}>Show {sourceCount} <ArrowRight size={17} /></button></div>
